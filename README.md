@@ -1,6 +1,6 @@
 # Unity WebGL Server
 
-A simple Node.js server for hosting your Unity WebGL builds locally.
+A simple node server for hosting Unity Web builds. Supports Gzip and Brotli.
 
 ## 1. Setup
 
