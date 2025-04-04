@@ -1,4 +1,4 @@
-# Unity WebGL Server
+# Unity Web Server
 
 A simple node server for hosting Unity Web builds. Supports Gzip and Brotli.
 
