@@ -13,7 +13,7 @@ npm install
 
 ## 2. Adding WebGL Builds
 
-Copy your Unity WebGL build folders as subfolders of ./Builds.
+Copy your WebGL build folders as subfolders of 'Builds'. Example folder structure:
 
 ```
 project-root/
@@ -33,7 +33,7 @@ Run the server with:
 npm start
 ```
 
-The server will start at http://localhost:8080
+The server will by default start at http://localhost:8080
 
 ## 4. Play the builds
 
