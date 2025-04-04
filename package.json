@@ -1,0 +1,15 @@
+{
+  "name": "unity-webgl-server",
+  "version": "1.0.0",
+  "description": "Server for Unity WebGL builds",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [ ],
+  "author": "Maoyeedy",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
