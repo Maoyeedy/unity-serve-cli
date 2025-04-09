@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Server for Unity WebGL builds",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
