@@ -5,7 +5,8 @@ A simple node server for hosting Unity Web builds. Supports Gzip and Brotli.
 ## 1. Setup
 
 1. Clone or download this repository
-2. Install dependencies:
+2. Install Node.js if you haven't already.
+3. Install dependencies:
 
 ```bash
 npm install
@@ -33,11 +34,17 @@ Run the server with:
 npm start
 ```
 
-The server will by default start at http://localhost:8080
+or if you have deno installed, you can use the deno version:
+
+```bash
+npm start-deno
+```
+
+The server will then start at http://localhost:8080
 
 ## 4. Play the builds
 
-1. Open according link with your browser. (preferably Chrome)
+1. Open the corresponding link with your browser. (preferably Chrome)
 2. You will see a list of your WebGL builds.
 3. Click on any build's name to run it
 

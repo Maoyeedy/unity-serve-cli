@@ -90,7 +90,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
-        "npm:express@^4.19.2"
+        "npm:express@^5.1.0"
       ]
     }
   }
