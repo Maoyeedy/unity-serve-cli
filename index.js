@@ -2,15 +2,16 @@
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
-import express from 'express'
+import Fastify from 'fastify'
+import fastifyStatic from '@fastify/static'
 import { generateHomepage } from './homepage.js'
 
 // ES Module approach
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-// Express settings
-const app = express()
+// Fastify settings
+const fastify = Fastify()
 const hostname = 'localhost'
 const port = 8080
 const enableCORS = false
@@ -20,8 +21,9 @@ const enableWasmMultithreading = true
 const baseDir = __dirname
 const buildsDir = join(baseDir, 'Builds')
 
-app.use((req, res, next) => {
-    var path = req.url
+// Middleware for headers
+fastify.addHook('onRequest', (request, reply, done) => {
+    const path = request.url
 
     if (enableWasmMultithreading &&
         (
@@ -31,63 +33,76 @@ app.use((req, res, next) => {
             path.includes('.htm')
         )
     ) {
-        res.set('Cross-Origin-Opener-Policy', 'same-origin')
-        res.set('Cross-Origin-Embedder-Policy', 'require-corp')
-        res.set('Cross-Origin-Resource-Policy', 'cross-origin')
+        reply.header('Cross-Origin-Opener-Policy', 'same-origin')
+        reply.header('Cross-Origin-Embedder-Policy', 'require-corp')
+        reply.header('Cross-Origin-Resource-Policy', 'cross-origin')
     }
 
     if (enableCORS) {
-        res.set('Access-Control-Allow-Origin', '*')
+        reply.header('Access-Control-Allow-Origin', '*')
     }
 
     if (path.endsWith('.br')) {
-        res.set('Content-Encoding', 'br')
+        reply.header('Content-Encoding', 'br')
     } else if (path.endsWith('.gz')) {
-        res.set('Content-Encoding', 'gzip')
+        reply.header('Content-Encoding', 'gzip')
     }
 
     if (path.includes('.wasm')) {
-        res.set('Content-Type', 'application/wasm')
+        reply.header('Content-Type', 'application/wasm')
     } else if (path.includes('.js')) {
-        res.set('Content-Type', 'application/javascript')
+        reply.header('Content-Type', 'application/javascript')
     } else if (path.includes('.json')) {
-        res.set('Content-Type', 'application/json')
+        reply.header('Content-Type', 'application/json')
     } else if (
         path.includes('.data') ||
         path.includes('.bundle') ||
         path.endsWith('.unityweb')
     ) {
-        res.set('Content-Type', 'application/octet-stream')
+        reply.header('Content-Type', 'application/octet-stream')
     }
 
-    if (req.headers['cache-control'] == 'no-cache' &&
+    if (request.headers['cache-control'] == 'no-cache' &&
         (
-            req.headers['if-modified-since'] ||
-            req.headers['if-none-match']
+            request.headers['if-modified-since'] ||
+            request.headers['if-none-match']
         )
     ) {
-        delete req.headers['cache-control']
+        delete request.headers['cache-control']
     }
 
-    next()
+    done()
 })
 
-app.get('/', (req, res) => {
-    res.send(generateHomepage(buildsDir))
+// Homepage route
+fastify.get('/', (request, reply) => {
+    reply.header('Content-Type', 'text/html')
+    reply.send(generateHomepage(buildsDir))
 })
 
-app.use('/', express.static(baseDir, { immutable: true }))
-
-const server = app.listen(port, hostname, () => {
-    console.log(`Web server serving at http://${hostname}:${port}`)
-    // console.log(`Web server serving directory ${baseDir} at http://${hostname}:${port}`);
+// Static file serving
+fastify.register(fastifyStatic, {
+    root: baseDir,
+    prefix: '/',
+    immutable: true
 })
 
-server.addListener('error', (error) => {
-    console.error(error)
-})
+// Start the server
+const start = async () => {
+    try {
+        await fastify.listen({ port, host: hostname })
+        console.log(`Web server serving at http://${hostname}:${port}`)
+    } catch (err) {
+        console.error(err)
+        process.exit(1)
+    }
+}
 
-server.addListener('close', () => {
+start()
+
+// Handle process termination
+process.on('SIGINT', async () => {
+    await fastify.close()
     console.log('Server stopped.')
-    process.exit()
+    process.exit(0)
 })
