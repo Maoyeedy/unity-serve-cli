@@ -2,10 +2,9 @@ import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 /**
- * @param {string} buildsPath
+ * @param {string} buildsDir
  * @returns {string} - HTML content
  */
-
 function generateHomepage (buildsDir) {
     let buildLinks = ''
 

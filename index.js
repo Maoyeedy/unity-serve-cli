@@ -6,22 +6,19 @@ import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
 import { generateHomepage } from './homepage.js'
 
-// ES Module approach
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-// Fastify settings
 const fastify = Fastify()
 const hostname = 'localhost'
 const port = 8080
 const enableCORS = false
 const enableWasmMultithreading = true
 
-// Directory Settings
 const baseDir = __dirname
 const buildsDir = join(baseDir, 'Builds')
 
-// Middleware for headers
+// Add response headers based on request
 fastify.addHook('onRequest', (request, reply, done) => {
     const path = request.url
 
@@ -80,14 +77,13 @@ fastify.get('/', (request, reply) => {
     reply.send(generateHomepage(buildsDir))
 })
 
-// Static file serving
+// Register static file serving
 fastify.register(fastifyStatic, {
     root: baseDir,
     prefix: '/',
     immutable: true
 })
 
-// Start the server
 const start = async () => {
     try {
         await fastify.listen({ port, host: hostname })
