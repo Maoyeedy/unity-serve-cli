@@ -36,18 +36,13 @@ function generateHomepage (buildsDir) {
         <html>
             <head>
                 <title>Unity WebGL Builds</title>
-                <style>
-                    body { font-family: sans-serif; margin: 20px; max-width: 800px; margin: 0 auto; padding: 20px; }
-                    h1 { color: #333; }
-                    ul { list-style-type: none; padding: 0; }
-                    li { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 5px; }
-                    a { color: #0066cc; text-decoration: none; font-size: 18px; }
-                    a:hover { text-decoration: underline; }
-                </style>
+                <link rel="stylesheet" href="/style.css">
             </head>
             <body>
-                <h1>Unity WebGL Builds</h1>
-                ${buildLinks}
+                <div class="container">
+                    <h1>Unity WebGL Builds</h1>
+                    ${buildLinks}
+                </div>
             </body>
         </html>
     `
