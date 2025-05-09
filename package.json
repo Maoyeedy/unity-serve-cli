@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "start-deno": "deno run --allow-net --allow-read index-deno.js"
+    "start": "node index.js"
   },
   "keywords": [ ],
   "author": "Maoyeedy",
