@@ -12,7 +12,7 @@ const __dirname = dirname(__filename)
 
 const fastify = Fastify()
 const hostname = 'localhost'
-const port = 8080
+let port = 8080
 const enableCORS = true
 const enableWasmMultithreading = true
 
@@ -85,17 +85,22 @@ fastify.register(fastifyStatic, {
     immutable: true
 })
 
-const start = async () => {
+const start = async (currentPort) => {
     try {
-        await fastify.listen({ port, host: hostname })
-        console.log(`Web server serving at http://${hostname}:${port}`)
+        await fastify.listen({ port: currentPort, host: hostname })
+        console.log(`Web server serving at http://${hostname}:${currentPort}`)
     } catch (err) {
-        console.error(err)
-        process.exit(1)
+        if (err.code === 'EADDRINUSE') {
+            console.log(`Port ${currentPort} is in use, trying ${currentPort + 1}...`)
+            await start(currentPort + 1)
+        } else {
+            console.error(err)
+            process.exit(1)
+        }
     }
 }
 
-start()
+start(port)
 
 // Handle process termination
 process.on('SIGINT', async () => {
