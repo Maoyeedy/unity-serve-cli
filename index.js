@@ -13,14 +13,14 @@ const __dirname = dirname(__filename)
 const fastify = Fastify()
 const hostname = 'localhost'
 const port = 8080
-const enableCORS = false
+const enableCORS = true
 const enableWasmMultithreading = true
 
 // Support for command-line argument to specify the target directory
 const targetDir = process.argv[2] ? join(process.cwd(), process.argv[2]) : process.cwd()
 
 // Add response headers based on request
-fastify.addHook('onRequest', (request, reply, done) => {
+fastify.addHook('onSend', (request, reply, payload, done) => {
     const path = request.url
 
     if (enableWasmMultithreading &&
