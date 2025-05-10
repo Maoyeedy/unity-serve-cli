@@ -103,7 +103,7 @@ async function scanBuilds(targetDir, ignorePatterns = ['**/node_modules/**', '**
 
       builds.push({
         name: buildName,
-        path: `${relPath}/`,
+        path: relPath.endsWith('/') ? relPath : `${relPath}/`,
         fullpath: buildDir,
         size,
         compressionType
