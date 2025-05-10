@@ -1,6 +1,7 @@
 # Unity Serve
 
-https://img.shields.io/npm/v/unity-serve
+<!-- ![Unity Serve](https://img.shields.io/npm/v/unity-serve) -->
+[![Unity Serve](https://img.shields.io/npm/v/unity-serve)](https://www.npmjs.com/package/unity-serve)
 
 A blazing fast server that host Unity WebGL builds with correct headers, supporting Gzip and Brotli.
 
