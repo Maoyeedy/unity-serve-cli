@@ -1,5 +1,7 @@
 # Unity Serve
 
+https://img.shields.io/npm/v/unity-serve
+
 A blazing fast server that host Unity WebGL builds with correct headers, supporting Gzip and Brotli.
 
 ## Installation
