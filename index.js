@@ -15,7 +15,8 @@ const port = 8080
 const enableCORS = false
 const enableWasmMultithreading = true
 
-const baseDir = __dirname
+// Support for command-line argument to specify the base directory
+const baseDir = process.argv[2] ? process.cwd() : __dirname
 const buildsDir = join(baseDir, 'Builds')
 
 // Add response headers based on request

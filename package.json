@@ -1,9 +1,12 @@
 {
-  "name": "unity-webgl-server",
-  "version": "1.1.0",
+  "name": "unity-server",
+  "version": "1.2.0",
   "description": "Server for Unity WebGL builds",
   "main": "index.js",
   "type": "module",
+  "bin": {
+    "unityserver": "./index.js"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js"
