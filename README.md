@@ -1,72 +1,34 @@
-# Unity Server
+# Unity Serve
 
-A server for playing Unity Web builds. Supports Gzip and Brotli.
+A blazing fast server that host Unity WebGL builds with correct headers, supporting Gzip and Brotli.
 
-## Usage
-### 1. Using as a CLI tool
-
-You can quickly serve your Unity WebGL builds without cloning this repository:
+## Installation
 
 ```bash
-# Navigate to your project directory containing a 'Builds' folder
-cd your-project
+# Globally install the package
+npm install -g unity-serve
+unity-serve $Path
 
-# Run the server directly with npx
-npx unity-webgl-server .
-
-# Or globally install the package
-npm install -g unity-webgl-server
-
-# And then use it anywhere
-unityserver .
+# Or one time use
+npx unity-serve $Path
 ```
 
-The server will start at http://localhost:8080 and serve any Unity WebGL builds found in the `./Builds` directory.
-
-### 2. Manual Setup
-
-1. Clone or download this repository
-2. Install Node.js if you haven't already.
-3. Install dependencies:
-
-```bash
-npm install
-```
-
-4. Copy your WebGL builds to './Builds'. Example folder structure:
-
-```
-project-root/
-├── Builds/
-│   ├── DungeonShuffle/
-│   ├── RubyRanAwayFromHome/
-│   ├── WebGLBuild_3_Final_NoEdit_LastEdition_ForReal_5/
-│   └── ...
-└── ...
-```
-
-5. Run the server with:
-
-```bash
-npm start
-```
-
-The server will then start at http://localhost:8080
+The server will start at http://localhost:8080 and list all WebGL directory recursively under `$Path`.
 
 ## Play the builds
 
 1. Open the corresponding link with your browser. (preferably Chrome)
-2. You will see a list of your WebGL builds.
-3. Click on any build's name to run it
+2. If used correct, you'll see a list of your WebGL builds.
+3. Click on any build's name to launch it.
 
-- If the build doesn't load, try forcing a hard refresh with Ctrl+Shift+R
+> If the game doesn't load, try Ctrl+Shift+R to force reload.
 
 ## Development Options
 
-You can modify the following settings in `index.js`:
+Settings in `index.js`:
 
-- `hostname`: The hostname to listen on ('localhost' by default)
-- `port`: The port to use (8080 by default)
+- `hostname`: 'localhost' by default. For public hosting, change it to '0.0.0.0'
+- `port`: 8080 by default, will increment if port occupied
 - `enableCORS`: Whether to enable Cross-Origin Resource Sharing
 - `enableWasmMultithreading`: Whether to enable WebAssembly multithreading support
 
