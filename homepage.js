@@ -76,10 +76,35 @@ async function scanBuilds(targetDir) {
               const relativePath = buildDir.substring(targetDir.length).replace(/\\/g, '/');
               const size = await calculateDirSize(buildDir);
 
+              // Detect compression type by checking for wasm files
+              let compressionType = 'Unknown';
+              try {
+                // Check in the Build subdirectory
+                const buildSubdir = join(buildDir, 'Build');
+                if (await fileExists(buildSubdir)) {
+                  const buildFiles = await readdir(buildSubdir);
+                  for (const file of buildFiles) {
+                    if (file.endsWith('.wasm.br')) {
+                      compressionType = 'Brotli';
+                      break;
+                    } else if (file.endsWith('.wasm.gz')) {
+                      compressionType = 'Gzip';
+                      break;
+                    } else if (file.endsWith('.wasm')) {
+                      compressionType = 'Uncompressed';
+                      break;
+                    }
+                  }
+                }
+              } catch (err) {
+                // Skip if we can't read the directory
+              }
+
               builds.push({
                 name: buildName,
                 path: `${relativePath}/`,
-                size
+                size,
+                compressionType
               });
             }
           } catch (err) {
@@ -120,7 +145,7 @@ function generateBuildsList(builds) {
   }
 
   const buildItems = builds
-    .map(build => `<li><a href="${build.path}"><span class="build-name">${build.name}</span><span class="build-size">${formatSizeToMB(build.size)}</span></a></li>`)
+    .map(build => `<li><a href="${build.path}"><span class="build-name">${build.name}</span><span class="build-size">${build.compressionType} ${formatSizeToMB(build.size)}</span></a></li>`)
     .join('');
 
   return `<ul>${buildItems}</ul>`;
