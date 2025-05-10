@@ -155,6 +155,10 @@ function generateBuildsList(builds) {
  */
 async function generateHomepage(targetDir) {
   const builds = await scanBuilds(targetDir);
+
+  // Sort builds by name in ascending order
+  builds.sort((a, b) => a.name.localeCompare(b.name));
+
   const content = generateBuildsList(builds);
 
   const styles = `
