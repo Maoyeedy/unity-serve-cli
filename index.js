@@ -72,9 +72,9 @@ fastify.addHook('onRequest', (request, reply, done) => {
 })
 
 // Homepage route
-fastify.get('/', (request, reply) => {
+fastify.get('/', async (request, reply) => {
     reply.header('Content-Type', 'text/html')
-    reply.send(generateHomepage(buildsDir))
+    reply.send(await generateHomepage(buildsDir))
 })
 
 // Register static file serving
