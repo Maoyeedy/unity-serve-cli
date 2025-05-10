@@ -206,6 +206,8 @@ async function generateHomepage(targetDir) {
       font-weight: 600;
       border-bottom: 2px solid #e9ecef;
       padding-bottom: 15px;
+      font-size: 24px;
+      font-style: italic;
     }
 
     ul {
@@ -272,7 +274,7 @@ async function generateHomepage(targetDir) {
         </head>
         <body>
             <div class="container">
-                <h1>Unity WebGL Builds</h1>
+                <h1>${targetDir}</h1>
                 ${content}
             </div>
         </body>
