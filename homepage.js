@@ -42,7 +42,7 @@ async function fileExists(path) {
 }
 
 /**
- * Scans for available Unity WebGL builds by finding ServiceWorker.js files using glob
+ * Scans for available Unity WebGL builds by finding TemplateData directories
  * @param {string} targetDir - Root directory to scan
  * @param {string[]} [ignorePatterns] - Patterns to ignore (node_modules, .git, Library by default)
  * @returns {Promise<Array>} Array of found builds
@@ -54,24 +54,39 @@ async function scanBuilds(targetDir, ignorePatterns = ['**/node_modules/**', '**
   try {
     if (!await fileExists(targetDir)) return [];
 
-    // Find all ServiceWorker.js files using fast-glob
-    const serviceWorkerPaths = await glob('**/ServiceWorker.js', {
+    // Find all TemplateData directories
+    const templateDataPaths = await glob('**/TemplateData', {
       cwd: targetDir,
       ignore: ignorePatterns,
+      onlyDirectories: true,
       absolute: false
     });
 
-    for (const relativePath of serviceWorkerPaths) {
-      const buildDir = join(targetDir, relativePath.replace(/ServiceWorker\.js$/, ''));
+    // Process TemplateData directories
+    for (const relativePath of templateDataPaths) {
+      // TemplateData is inside the build directory, so we need the parent
+      const buildDir = join(targetDir, relativePath.replace(/TemplateData$/, ''));
 
       if (processedDirs.has(buildDir)) continue;
+
+      // Check if this is a valid build by verifying if it contains Build directory with wasm file
+      const buildSubDir = join(buildDir, 'Build');
+      if (!await fileExists(buildSubDir)) continue;
+
+      // Check for wasm file in the Build directory
+      const wasmFiles = await glob('**/*.wasm*', {
+        cwd: buildSubDir,
+        absolute: false
+      });
+
+      if (wasmFiles.length === 0) continue;
+
       processedDirs.add(buildDir);
 
       const pathParts = relativePath.split(/[/\\]/);
-
       let buildName;
 
-      // Get parent directory of ServiceWorker.js
+      // Get parent directory of TemplateData
       if (pathParts.length >= 2) {
         buildName = pathParts[pathParts.length - 2];
       }
@@ -83,28 +98,8 @@ async function scanBuilds(targetDir, ignorePatterns = ['**/node_modules/**', '**
       const relPath = buildDir.substring(targetDir.length).replace(/\\/g, '/');
       const size = await calculateDirSize(buildDir);
 
-      // Detect compression type by checking for wasm files
-      let compressionType = 'Unknown';
-      try {
-        const buildSubdir = join(buildDir, 'Build');
-        if (await fileExists(buildSubdir)) {
-          const buildFiles = await readdir(buildSubdir);
-          for (const file of buildFiles) {
-            if (file.endsWith('.wasm.br')) {
-              compressionType = 'Brotli';
-              break;
-            } else if (file.endsWith('.wasm.gz')) {
-              compressionType = 'Gzip';
-              break;
-            } else if (file.endsWith('.wasm')) {
-              compressionType = 'Uncompressed';
-              break;
-            }
-          }
-        }
-      } catch (err) {
-        // Skip if we can't read the directory
-      }
+      // Detect compression type
+      const compressionType = await detectCompressionType(buildDir);
 
       builds.push({
         name: buildName,
@@ -120,6 +115,36 @@ async function scanBuilds(targetDir, ignorePatterns = ['**/node_modules/**', '**
     console.error('Error scanning builds:', err);
     return [];
   }
+}
+
+/**
+ * Detects compression type by checking for wasm files
+ * @param {string} buildDir - Build directory path
+ * @returns {Promise<string>} Compression type
+ */
+async function detectCompressionType(buildDir) {
+  let compressionType = 'Unknown';
+  try {
+    const buildSubdir = join(buildDir, 'Build');
+    if (await fileExists(buildSubdir)) {
+      const buildFiles = await readdir(buildSubdir);
+      for (const file of buildFiles) {
+        if (file.endsWith('.wasm.br')) {
+          compressionType = 'Brotli';
+          break;
+        } else if (file.endsWith('.wasm.gz')) {
+          compressionType = 'Gzip';
+          break;
+        } else if (file.endsWith('.wasm')) {
+          compressionType = 'Uncompressed';
+          break;
+        }
+      }
+    }
+  } catch (err) {
+    // Skip if we can't read the directory
+  }
+  return compressionType;
 }
 
 /**
