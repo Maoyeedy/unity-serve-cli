@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { readdir, stat, access } from 'node:fs/promises'
+import glob from 'fast-glob'
 
 /**
  * Calculates the total size of a directory recursively
@@ -41,86 +42,81 @@ async function fileExists(path) {
 }
 
 /**
- * Scans for available Unity WebGL builds by recursively finding ServiceWorker.js files
- * @param {string} targetDir - Root directory to scan recursively
+ * Scans for available Unity WebGL builds by finding ServiceWorker.js files using glob
+ * @param {string} targetDir - Root directory to scan
+ * @param {string[]} [ignorePatterns] - Patterns to ignore (node_modules, .git, Library by default)
  * @returns {Promise<Array>} Array of found builds
  */
-async function scanBuilds(targetDir) {
+async function scanBuilds(targetDir, ignorePatterns = ['**/node_modules/**', '**/.git/**', '**/Library/**', '**/Temp/**', '**/Obj/**']) {
   const builds = [];
   const processedDirs = new Set();
 
   try {
     if (!await fileExists(targetDir)) return [];
 
-    async function scanDirectory(dir) {
+    // Find all ServiceWorker.js files using fast-glob
+    const serviceWorkerPaths = await glob('**/ServiceWorker.js', {
+      cwd: targetDir,
+      ignore: ignorePatterns,
+      absolute: false
+    });
+
+    for (const relativePath of serviceWorkerPaths) {
+      const buildDir = join(targetDir, relativePath.replace(/ServiceWorker\.js$/, ''));
+
+      if (processedDirs.has(buildDir)) continue;
+      processedDirs.add(buildDir);
+
+      const pathParts = relativePath.split(/[/\\]/);
+
+      let buildName;
+
+      // Get parent directory of ServiceWorker.js
+      if (pathParts.length >= 2) {
+        buildName = pathParts[pathParts.length - 2];
+      }
+
+      if (!buildName) {
+        buildName = 'Unknown Build';
+      }
+
+      const relPath = buildDir.substring(targetDir.length).replace(/\\/g, '/');
+      const size = await calculateDirSize(buildDir);
+
+      // Detect compression type by checking for wasm files
+      let compressionType = 'Unknown';
       try {
-        const items = await readdir(dir);
-
-        for (const item of items) {
-          const itemPath = join(dir, item);
-
-          try {
-            const stats = await stat(itemPath);
-
-            if (stats.isDirectory()) {
-              await scanDirectory(itemPath);
-            } else if (item === 'ServiceWorker.js') {
-              // Found ServiceWorker.js, add its parent directory to builds
-              const buildDir = dir;
-
-              // Skip if we've already processed this directory
-              if (processedDirs.has(buildDir)) continue;
-              processedDirs.add(buildDir);
-
-              const buildName = buildDir.split(/[/\\]/).pop();
-              const relativePath = buildDir.substring(targetDir.length).replace(/\\/g, '/');
-              const size = await calculateDirSize(buildDir);
-
-              // Detect compression type by checking for wasm files
-              let compressionType = 'Unknown';
-              try {
-                // Check in the Build subdirectory
-                const buildSubdir = join(buildDir, 'Build');
-                if (await fileExists(buildSubdir)) {
-                  const buildFiles = await readdir(buildSubdir);
-                  for (const file of buildFiles) {
-                    if (file.endsWith('.wasm.br')) {
-                      compressionType = 'Brotli';
-                      break;
-                    } else if (file.endsWith('.wasm.gz')) {
-                      compressionType = 'Gzip';
-                      break;
-                    } else if (file.endsWith('.wasm')) {
-                      compressionType = 'Uncompressed';
-                      break;
-                    }
-                  }
-                }
-              } catch (err) {
-                // Skip if we can't read the directory
-              }
-
-              builds.push({
-                name: buildName,
-                path: `${relativePath}/`,
-                size,
-                compressionType
-              });
+        const buildSubdir = join(buildDir, 'Build');
+        if (await fileExists(buildSubdir)) {
+          const buildFiles = await readdir(buildSubdir);
+          for (const file of buildFiles) {
+            if (file.endsWith('.wasm.br')) {
+              compressionType = 'Brotli';
+              break;
+            } else if (file.endsWith('.wasm.gz')) {
+              compressionType = 'Gzip';
+              break;
+            } else if (file.endsWith('.wasm')) {
+              compressionType = 'Uncompressed';
+              break;
             }
-          } catch (err) {
-            // Skip inaccessible files or directories
-            continue;
           }
         }
       } catch (err) {
-        // Skip inaccessible directories
-        return;
+        // Skip if we can't read the directory
       }
+
+      builds.push({
+        name: buildName,
+        path: `${relPath}/`,
+        size,
+        compressionType
+      });
     }
 
-    await scanDirectory(targetDir);
     return builds;
   } catch (err) {
+    console.error('Error scanning builds:', err);
     return [];
   }
 }
