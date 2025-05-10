@@ -1,6 +1,5 @@
-import { existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { readdir, stat } from 'node:fs/promises'
+import { readdir, stat, access } from 'node:fs/promises'
 
 /**
  * Calculates the total size of a directory recursively
@@ -24,15 +23,24 @@ async function calculateDirSize(dirPath) {
   return totalSize;
 }
 
+async function fileExists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Scans for available Unity WebGL builds
  * @param {string} buildsDir - Directory containing build folders
  * @returns {Promise<Array>} Array of found builds
  */
 async function scanBuilds(buildsDir) {
-  if (!existsSync(buildsDir)) return [];
-
   try {
+    if (!await fileExists(buildsDir)) return [];
+
     const items = await readdir(buildsDir);
     const builds = [];
 
@@ -41,7 +49,7 @@ async function scanBuilds(buildsDir) {
 
       try {
         const stats = await stat(itemPath);
-        if (stats.isDirectory() && existsSync(join(itemPath, 'ServiceWorker.js'))) {
+        if (stats.isDirectory() && await fileExists(join(itemPath, 'ServiceWorker.js'))) {
           const size = await calculateDirSize(itemPath);
           builds.push({
             name: item,
