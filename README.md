@@ -34,12 +34,6 @@ Run the server with:
 npm start
 ```
 
-or if you have deno installed, you can use the deno version:
-
-```bash
-npm start-deno
-```
-
 The server will then start at http://localhost:8080
 
 ## 4. Play the builds
