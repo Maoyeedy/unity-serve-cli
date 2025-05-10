@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
+import { readFile } from 'node:fs/promises'
 
 import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
@@ -15,9 +16,8 @@ const port = 8080
 const enableCORS = false
 const enableWasmMultithreading = true
 
-// Support for command-line argument to specify the base directory
-const baseDir = process.argv[2] ? process.cwd() : __dirname
-const buildsDir = join(baseDir, 'Builds')
+// Support for command-line argument to specify the target directory
+const targetDir = process.argv[2] ? join(process.cwd(), process.argv[2]) : process.cwd()
 
 // Add response headers based on request
 fastify.addHook('onRequest', (request, reply, done) => {
@@ -75,12 +75,12 @@ fastify.addHook('onRequest', (request, reply, done) => {
 // Homepage route
 fastify.get('/', async (request, reply) => {
     reply.header('Content-Type', 'text/html')
-    reply.send(await generateHomepage(buildsDir))
+    reply.send(await generateHomepage(targetDir))
 })
 
 // Register static file serving
 fastify.register(fastifyStatic, {
-    root: baseDir,
+    root: targetDir,
     prefix: '/',
     immutable: true
 })
