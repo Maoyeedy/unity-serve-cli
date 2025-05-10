@@ -1,6 +1,6 @@
 {
   "name": "unity-server",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Server for Unity WebGL builds",
   "main": "index.js",
   "type": "module",
