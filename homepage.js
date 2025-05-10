@@ -109,6 +109,7 @@ async function scanBuilds(targetDir, ignorePatterns = ['**/node_modules/**', '**
       builds.push({
         name: buildName,
         path: `${relPath}/`,
+        fullpath: buildDir,
         size,
         compressionType
       });
@@ -141,7 +142,7 @@ function generateBuildsList(builds) {
   }
 
   const buildItems = builds
-    .map(build => `<li><a href="${build.path}"><span class="build-name">${build.name}</span><span class="build-size">${build.compressionType} ${formatSizeToMB(build.size)}</span></a></li>`)
+    .map(build => `<li><a href="${build.path}" title="${build.fullpath}"><span class="build-name">${build.name}</span><span class="build-size">${build.compressionType} ${formatSizeToMB(build.size)}</span></a></li>`)
     .join('');
 
   return `<ul>${buildItems}</ul>`;
