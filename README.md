@@ -2,7 +2,8 @@
 
 A server for playing Unity Web builds. Supports Gzip and Brotli.
 
-## 1. Using as a CLI tool
+## Usage
+### 1. Using as a CLI tool
 
 You can quickly serve your Unity WebGL builds without cloning this repository:
 
@@ -22,7 +23,7 @@ unityserver .
 
 The server will start at http://localhost:8080 and serve any Unity WebGL builds found in the `./Builds` directory.
 
-## 2. Manual Setup
+### 2. Manual Setup
 
 1. Clone or download this repository
 2. Install Node.js if you haven't already.
@@ -32,9 +33,7 @@ The server will start at http://localhost:8080 and serve any Unity WebGL builds 
 npm install
 ```
 
-## 3. Adding WebGL Builds
-
-Copy your WebGL build folders as subfolders of 'Builds'. Example folder structure:
+4. Copy your WebGL builds to './Builds'. Example folder structure:
 
 ```
 project-root/
@@ -46,9 +45,7 @@ project-root/
 └── ...
 ```
 
-## 4. Starting the Server
-
-Run the server with:
+5. Run the server with:
 
 ```bash
 npm start
@@ -56,7 +53,7 @@ npm start
 
 The server will then start at http://localhost:8080
 
-## 5. Play the builds
+## Play the builds
 
 1. Open the corresponding link with your browser. (preferably Chrome)
 2. You will see a list of your WebGL builds.
@@ -64,7 +61,7 @@ The server will then start at http://localhost:8080
 
 - If the build doesn't load, try forcing a hard refresh with Ctrl+Shift+R
 
-## 6. Options
+## Development Options
 
 You can modify the following settings in `index.js`:
 
